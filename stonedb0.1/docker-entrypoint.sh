@@ -30,7 +30,6 @@ stonedb_decompress(){
 	if [[ ! -f /tmp/stone56.tar.gz || -f $@ ]];then
 		stonedb_error "cant find /tmp/stonedb.tar.gz"
 	else
-		rm -rf /stone*
 		stonedb_note "tar -zxvf /tmp/stone*.tar.gz -C /"
 		tar -zxvf /tmp/stone*.tar.gz -C $tar_dir > /dev/null
 		ln -s $stonedb_dir/bin/* /usr/local/bin/
@@ -47,12 +46,12 @@ stonedb_check_config(){
 
 
 
-stonedb_fix_socket(){
-	socket=`sed '/socket/!d;s/.*=//' /stonedb*/install/stonedb.cnf |head -n 1`
-	if [ $socket ];then
-		rm $socket
-	fi
-}
+# stonedb_fix_socket(){
+# 	socket=`sed '/socket/!d;s/.*=//' /stonedb*/install/stonedb.cnf |head -n 1`
+# 	if [ $socket ];then
+# 		rm $socket
+# 	fi
+# }
 
 #get database dir
 stonedb_get_database_dir(){
@@ -60,19 +59,27 @@ stonedb_get_database_dir(){
 	# DATADIR=`sed '/datadir/!d;s/.*= //' /stonedb*/install/stonedb.cnf`
 	# LOGBIN=`sed '/log-bin/!d;s/.*=//' /stonedb*/install/stonedb.cnf`
 	#sed '/logbin.*=/' /stonedb*/install/stonedb.cnf
-	DATADIR="$stonedb_dir/data/innodb"
+	DATADIR="$stonedb_dir/data"
 	LOGBIN="$stonedb_dir/binlog"
 	LOG=" $stonedb_dir/log"
 	TMP="$stonedb_dir/tmp"
+	stonedb_note "$DATADIR/mysql"
+}
+
+stonedb_check_datadir(){
+	declare -g DATABASE_ALREADY_EXISTS
+	
+	if [ -d "$DATADIR/mysql" ];then
+		DATABASE_ALREADY_EXISTS='true'
+	fi
 }
 
 #create database dir
 stonedb_create_db_directories(){
 	stonedb_note "create database dir `echo $stonedb_dir`"
 	# mkdir -p $stonedb/{data/innodb,binlog,log,tmp}
-	stonedb_note "mkdir -p $DATADIR $LOGBIN $LOG $TMP"
-	rm -rf $DATADIR $LOGBIN $LOG $TMP
-	mkdir -p $DATADIR $LOGBIN $LOG $TMP
+	stonedb_note "mkdir -p $DATADIR/innodb $LOGBIN $LOG $TMP"
+	mkdir -p $DATADIR/innodb $LOGBIN $LOG $TMP
 	chown -R mysql:mysql $(dirname "$stonedb_dir")
 	stonedb_note "Create stonedb database dir successfully!"
 }
@@ -99,24 +106,27 @@ stonedb_SET_ROOT(){
 _main(){
 	if [ "$1"=='mysqld' ];then
 		stonedb_note "weclone to StoneDB!'"
+		#get stonedb database dir
+		stonedb_get_database_dir
 		stonedb_check_datadir
-		echo ${#DATABASE_ALREADY_EXISTS}
+		#Decompress
+		stonedb_decompress 
+		#check stonedb.cnf
+		stonedb_check_config
+		#create database dir
+		stonedb_create_db_directories
+
+		
+		echo "${DATABASE_ALREADY_EXISTS}"
 		if [ -z "$DATABASE_ALREADY_EXISTS" ];then
-			
-			#Decompress
-			stonedb_decompress 
-			#check stonedb.cnf
-			stonedb_check_config
-			#get stonedb database dir
-			stonedb_get_database_dir
-			#create database dir
-			stonedb_create_db_directories
+
 			#Initializes database
 			stonedb_init_database
+
 			$stonedb_dir/support-files/mysql.server start
 			stonedb_SET_ROOT
-
 		fi
+		
 		$stonedb_dir/support-files/mysql.server restart
 		tail -f $stonedb_dir/log/mysqld.log
 	fi
