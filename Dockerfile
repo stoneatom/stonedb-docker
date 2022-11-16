@@ -12,9 +12,10 @@ MAINTAINER @zsp zhangshaopeng@stoneatom.com
 RUN apt clean && apt update -y
 # 
 RUN apt-get install wget libatomic1 libmarisa0 libsnappy1v5 libssl-dev libjemalloc-dev libncurses6 -y
-COPY stonedb_1.0.1-1_amd64.deb /tmp/stonedb_1.0.1-1_amd64.deb
-COPY lib-debian.tar.gz /tmp/lib-debian.tar.gz 
-RUN cd /tmp && tar zxvf lib-debian.tar.gz && cp lib/x86_64-linux-gnu/* /lib/x86_64-linux-gnu/
+COPY stonedb57_1.0.1-1_amd64.deb /tmp/stonedb57_1.0.1-1_amd64.deb
+RUN dpkg -i /tmp/stonedb*.deb
+COPY stonedb-lib.tar.gz /tmp/stonedb-lib.tar.gz 
+RUN cd /tmp && tar zxvf stonedb-lib.tar.gz && cp lib/* /lib/x86_64-linux-gnu/
 #COPY stone56.tar.gz /tmp/stone56.tar.gz
 
 COPY docker-entrypoint.sh /usr/local/bin/

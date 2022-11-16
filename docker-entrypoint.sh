@@ -19,7 +19,7 @@ stonedb_error() {
 	exit 1
 }
 
-function _check_deb(){
+_check_deb(){
 
 	if [ ! -f /tmp/stonedb*.deb ] ; then
 			stonedb_error "Cant find StoneDB*.deb "
@@ -33,7 +33,7 @@ function _check_deb(){
 		
 }
 
-function docker_verify_minimum_env(){
+docker_verify_minimum_env(){
 	if [ -z "$MYSQL_ROOT_PASSWORD" -a -z "$MYSQL_ALLOW_EMPTY_PASSWORD" -a -z "$MYSQL_RANDOM_ROOT_PASSWORD" ];then
 		stonedb_error <<-'EOF'
 			Database is uninitialized and password option is not specified
@@ -63,9 +63,9 @@ function docker_verify_minimum_env(){
 	fi
 }
 
-function stonedb_set_root_passwd(){
+stonedb_set_root_passwd(){
 	stonedb_note "set passwd"
-	sdb_passwd=`grep "temporary password" /opt/stonedb57/install/log/mysqld.log |awk -F " " '{print $11}'`
+	sdb_passwd=`grep "temporary password" /opt/stonedb57/install/log/tianmu.log |awk -F " " '{print $14}'`
 	/opt/stonedb57/install/bin/mysqladmin -uroot -p"$sdb_passwd" password "$MYSQL_ROOT_PASSWORD"
 	#create user
 	if [ -n "$MYSQL_USER" ];then
@@ -75,13 +75,31 @@ function stonedb_set_root_passwd(){
 	fi
 }
 
+stonedb_check_logdir(){
+	if [ ! -d /opt/stonedb57/install/log ];then
+		mkdir -p /opt/stonedb57/install/log
+		touch /opt/stonedb57/install//log/{query.log,tianmu.log,trace.log} \
+		&& chown -R mysql:mysql /opt/stonedb57/install//log/*
+    fi
+}
 
-function stonedb_install(){
+stonedb_install(){
 	docker_verify_minimum_env
 	_check_deb
-	dpkg -i /tmp/stonedb*.deb
-	echo 'export PATH=$PATH:/opt/stonedb57/install/bin/' >> ~/.bash_profile
-	. ~/.bash_profile
+	#mkdir pid datadir logdir and baselogdir
+	stonedb_check_logdir
+    if [ ! -d /opt/stonedb57/install/data/mysql/ ];then
+            #mkdir -p /opt/stonedb57/install/{data,binlog,log,tmp,redolog,undolog}
+	        mkdir -p /opt/stonedb57/install/data
+            chown -R mysql:mysql /opt/stonedb57/install/
+            /opt/stonedb57/install/bin/mysqld --defaults-file=/etc/my.cnf --initialize --user=mysql
+			/opt/stonedb57/install/support-files/mysql.server start
+			stonedb_set_root_passwd
+	else
+		stonedb_warn "datadir is exists,will create tianmu.log"
+		stonedb_check_logdir
+	fi
+	/opt/stonedb57/install/support-files/mysql.server restart
 	if [ $? -ne 0 ] ; then
 		stonedb_error <<-EOF
 			StoneDB install faild!
@@ -91,22 +109,26 @@ function stonedb_install(){
 			StoneDB install successfuly!
 		EOF
 	fi
-	stonedb_set_root_passwd
-	/opt/stonedb57/install/support-files/mysql.server restart
+        
+	# echo 'export PATH=$PATH:/opt/stonedb57/install/bin/' >> ~/.bash_profile
+	# . ~/.bash_profile
+
 
 }
 
-function _main(){
+_main(){
 	# _check_env
-	if [ -f /opt/stonedb*/install/bin/mysqld ];then
+	if [ -f /opt/stonedb*/install/bin/mysqld -a -d /opt/stonedb*/install/data/mysql  ];then
 		stonedb_note "StoneDB already exists,we will restart it......"
+		stonedb_check_logdir
+		chown -R mysql:mysql /opt/stonedb57/install/
 		/opt/stonedb57/install/support-files/mysql.server restart
 		
 	else
 		stonedb_note "StoneDB not install,we will install StoneDB......"
 		stonedb_install
 	fi
-
+	
 	tail -f /opt/stonedb57/install/log/tianmu.log
 
 	
