@@ -89,10 +89,10 @@ stonedb_install(){
 	#mkdir pid datadir logdir and baselogdir
 	stonedb_check_logdir
     if [ ! -d /opt/stonedb57/install/data/mysql/ ];then
-            #mkdir -p /opt/stonedb57/install/{data,binlog,log,tmp,redolog,undolog}
-	        mkdir -p /opt/stonedb57/install/data
-            chown -R mysql:mysql /opt/stonedb57/install/
-            /opt/stonedb57/install/bin/mysqld --defaults-file=/etc/my.cnf --initialize --user=mysql
+      #mkdir -p /opt/stonedb57/install/{data,binlog,log,tmp,redolog,undolog}
+      mkdir -p /opt/stonedb57/install/data
+      chown -R mysql:mysql /opt/stonedb57/install/
+      /opt/stonedb57/install/bin/mysqld --defaults-file=/etc/my.cnf --initialize --user=mysql
 			/opt/stonedb57/install/support-files/mysql.server start
 			stonedb_set_root_passwd
 	else
@@ -127,6 +127,17 @@ _main(){
 	else
 		stonedb_note "StoneDB not install,we will install StoneDB......"
 		stonedb_install
+
+    if [ $ROLE = "master" ]; then
+      echo "run master"
+      bash /usr/local/bin/stonedb-master.sh
+    fi
+
+    if [ $ROLE = "slave" ]; then
+      echo "run slave"
+      bash /usr/local/bin/stonedb-slave.sh
+    fi
+
 	fi
 	
 	tail -f /opt/stonedb57/install/log/tianmu.log

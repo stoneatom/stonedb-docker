@@ -2,6 +2,8 @@
 FROM debian:buster-slim
 
 MAINTAINER @zsp zhangshaopeng@stoneatom.com
+ENV ROLE = ""
+ENV MASTER_IP = ""
 
 # backup sources.list
 # RUN groupadd -r mysql && useradd -r -g mysql mysql
@@ -19,7 +21,11 @@ RUN cd /tmp && tar zxvf stonedb-lib.tar.gz && cp lib/* /lib/x86_64-linux-gnu/
 #COPY stone56.tar.gz /tmp/stone56.tar.gz
 
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh 
+COPY stonedb-master.sh /usr/local/bin/
+COPY stonedb-slave.sh /usr/local/bin/
+
+
+RUN ln -s /usr/local/bin/docker-entrypoint.sh /entrypoint.sh
 RUN chmod u+x usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT [ "docker-entrypoint.sh" ]
