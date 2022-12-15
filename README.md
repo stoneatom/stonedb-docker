@@ -23,7 +23,7 @@
         
 ```
 
-### How to build
+### How to run your stonedb database
 #### standalone
 ```shell
 docker run -itd \
