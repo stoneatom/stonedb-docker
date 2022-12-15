@@ -1,7 +1,7 @@
 ## Stonedb docker images make repository
 
 
-###File tree
+### File tree
 
 ```
 ├── Dockerfile
