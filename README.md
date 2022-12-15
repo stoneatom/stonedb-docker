@@ -23,7 +23,55 @@
         
 ```
 
-### How to use
+### How to build
+#### standalone
+```shell
+docker run -itd \
+--cpus={{Cpu}} \
+-m={{Memory}}M \
+--name {{ClusterName}} \
+-p 3306:3306 \
+--restart=always \
+-e MYSQL_ROOT_PASSWORD={{Password}} \
+-v {{DataPath}}/{{ClusterName}}/config/my.cnf:/opt/stonedb57/install/my.cnf:rw \
+-v {{DataPath}}/{{ClusterName}}/data:/opt/stonedb57/install/data:rw \
+stoneatom/stonedb:5.7v1.0.1_centos
+```
+
+#### master-slave
+run master
+```shell
+docker run -itd \
+--cpus={{Cpu}} \
+-m={{Memory}}M \
+--name {{ClusterName}} \
+-p 3306:3306 \
+--restart=always \
+-e MYSQL_ROOT_PASSWORD={{Password}} \
+-v {{DataPath}}/{{ClusterName}}/config/my.cnf:/opt/stonedb57/install/my.cnf:rw \
+-v {{DataPath}}/{{ClusterName}}/data:/opt/stonedb57/install/data:rw \
+-e ROLE=master \
+stoneatom/stonedb:5.7v1.0.1_centos
+```
+
+run slave
+```shell
+docker run -itd \
+--cpus={{Cpu}} \
+-m={{Memory}}M \
+--name {{ClusterName}} \
+-p 3306:3306 \
+--restart=always \
+-e MYSQL_ROOT_PASSWORD={{Password}} \
+-v {{DataPath}}/{{ClusterName}}/config/my.cnf:/opt/stonedb57/install/my.cnf:rw \
+-v {{DataPath}}/{{ClusterName}}/data:/opt/stonedb57/install/data:rw \
+-e ROLE=slave \
+-e MASTER_IP={{MasterIp}} \
+-e MASTER_PORT={{MasterPory}} \
+stoneatom/stonedb:5.7v1.0.1_centos
+```
+
+### How to build
 
 1. replace the rpm sofeware file and edit scripts for yourself
 2. edit Dockerfile and make docker images
