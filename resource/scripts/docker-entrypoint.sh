@@ -1,15 +1,15 @@
 #!/bin/bash
-set -e
+set -ex
 
-stonedb_note(){
-	 echo "$(date '+%Y-%m-%d %H:%M:%S') [Note] $@"
+stonedb_note() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') [Note] $@"
 }
 stonedb_warn() {
-	echo "$(date '+%Y-%m-%d %H:%M:%S') [Warn] $@"
+  echo "$(date '+%Y-%m-%d %H:%M:%S') [Warn] $@"
 }
 stonedb_error() {
-	echo "$(date '+%Y-%m-%d %H:%M:%S') [Error] $@"
-	exit 1
+  echo "$(date '+%Y-%m-%d %H:%M:%S') [Error] $@"
+  exit 1
 }
 
 docker_verify_minimum_env() {
@@ -44,17 +44,23 @@ docker_verify_minimum_env() {
 
 stonedb_set_root_passwd() {
   stonedb_note "set passwd"
-  sdb_passwd=$(grep "temporary password" /opt/stonedb57/install/log/tianmu.log | awk -F " " '{print $14}')
 
-  mysqladmin -uroot -h127.0.0.1   -p"$sdb_passwd" password "$MYSQL_ROOT_PASSWORD"
+  echo passwd
+  grep "temporary password" /opt/stonedb57/install/log/mysqld.log
+
+  grep "temporary password" /opt/stonedb57/install/log/tianmu.log
+
+  sdb_passwd=$(grep "temporary password" /opt/stonedb57/install/log/mysqld.log | awk -F " " '{print $11}')
+
+  mysql -h127.0.0.1 -uroot -p"$sdb_passwd" --connect-expired-password -e "alter user 'root'@'localhost'  identified by '$MYSQL_ROOT_PASSWORD';"
 
   #create user
   if [ -n "$MYSQL_USER" ]; then
     stonedb_note "grant all on *.* to $MYSQL_USER@%"
-    mysql -h127.0.0.1  -uroot -p"$MYSQL_ROOT_PASSWORD" -e "grant all on *.* to $MYSQL_USER@'%' identified by '$MYSQL_PASSWORD' with grant option"
+    mysql -h127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD" -e "grant all on *.* to $MYSQL_USER@'%' identified by '$MYSQL_PASSWORD' with grant option"
   else
     stonedb_note "grant all on *.* to root@%"
-    mysql -h127.0.0.1  -uroot -p"$MYSQL_ROOT_PASSWORD" -e "grant all on *.* to root@'%' identified by '$MYSQL_ROOT_PASSWORD' with grant option"
+    mysql -h127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD" -e "grant all on *.* to root@'%' identified by '$MYSQL_ROOT_PASSWORD' with grant option"
   fi
 
   if [ $? -ne 0 ]; then
@@ -69,10 +75,9 @@ stonedb_init() {
   mysqld --defaults-file=/opt/stonedb57/install/my.cnf --initialize --user=mysql
 }
 
-stonedb_start(){
+stonedb_start() {
   /etc/init.d/stonedb start >/dev/null 2>&1
 }
-
 
 master_slave() {
   if [ $ROLE = "master" ]; then

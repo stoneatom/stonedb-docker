@@ -34,7 +34,7 @@ EOF
   cp /opt/stonedb57/install/my.cnf /opt/stonedb57/install/my.cnf2
   sed -i 's/server-id = 1/server-id = 10360/g' /opt/stonedb57/install/my.cnf2
   sed -i "/server-id = 10360/r /tmp/stonedb-slave" /opt/stonedb57/install/my.cnf2
-  cat /opt/stonedb57/install/my.cnf2 > /opt/stonedb57/install/my.cnf
+  cat /opt/stonedb57/install/my.cnf2 >/opt/stonedb57/install/my.cnf
   rm -rf /opt/stonedb57/install/my.cnf2
 
   cat /opt/stonedb57/install/my.cnf
@@ -48,7 +48,7 @@ EOF
 }
 
 function export_all_database_to_slave() {
-  mysqldump -h$MASTER_IP -uroot -p$MYSQL_ROOT_PASSWORD --master-data=2 --force --all-databases >/tmp/stonedb-slave-db_bak$(date '+%Y%m%d').sql
+  mysqldump -h$MASTER_IP -uroot -p$MYSQL_ROOT_PASSWORD --single-transaction  --all-databases >/tmp-slave-db_bak$(date '+%Y%m%d').sql
 }
 
 function import_all_database_to_slave() {
@@ -70,6 +70,4 @@ function change_sync_master() {
 
 install_plug
 change_my_cnf
-export_all_database_to_slave
-import_all_database_to_slave
 change_sync_master
