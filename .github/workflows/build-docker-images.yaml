@@ -1,0 +1,27 @@
+name: "Build Stonedb Docker images"
+
+on:
+  push:
+    tags:
+      - "*v*"
+jobs:
+  build-docker-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v3.2.0
+        env:
+          tag: ${{  github.ref_name }}
+        with:
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/stonedb:${{ env.tag }}
