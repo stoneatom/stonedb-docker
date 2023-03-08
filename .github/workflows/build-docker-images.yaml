@@ -24,4 +24,6 @@ jobs:
           tag: ${{  github.ref_name }}
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/stonedb:${{ env.tag }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/stonedb:${{ env.tag }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/stonedb:latest
