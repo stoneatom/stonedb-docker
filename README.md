@@ -17,7 +17,7 @@
     │   ├── libzstd-devel-1.5.2-1.el7.x86_64.rpm
     │   ├── snappy-1.1.0-3.el7.x86_64.rpm
     │   ├── snappy-devel-1.1.0-3.el7.x86_64.rpm
-    │   └── stonedb-ce-5.7-v1.0.2.el7.x86_64.rpm
+    │   └── stonedb-ce-5.7-v1.0.3.el7.x86_64.rpm
     └── scripts
         ├── docker-entrypoint.sh
         ├── stonedb-master.sh
@@ -54,7 +54,7 @@ docker run -itd \
 -v {{DataPath}}/{{ClusterName}}/config/my.cnf:/opt/stonedb57/install/my.cnf:rw \
 -v {{DataPath}}/{{ClusterName}}/data:/opt/stonedb57/install/data:rw \
 -e ROLE=master \
-stoneatom/stonedb:5.7v1.0.2_centos
+stoneatom/stonedb:5.7v1.0.3_centos
 ```
 
 run slave
@@ -71,17 +71,17 @@ docker run -itd \
 -e ROLE=slave \
 -e MASTER_IP={{MasterIp}} \
 -e MASTER_PORT={{MasterPort}} \
-stoneatom/stonedb:5.7v1.0.2_centos
+stoneatom/stonedb:5.7v1.0.3_centos
 ```
 
 ### How to build
 
 1. replace the rpm sofeware file and edit scripts for yourself
 2. edit Dockerfile and make docker images
-```
-docker build -t your-docker-repository/you-images-name:5.7v1.0.2_centos .
+```shell
+docker build -t your-docker-repository/you-images-name:5.7v1.0.3_centos .
 ```
 3. push docker images
-```
-docker push your-docker-repository/you-images-name:5.7v1.0.2_centos 
+```shell
+docker push your-docker-repository/you-images-name:5.7v1.0.3_centos 
 ```
