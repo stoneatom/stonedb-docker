@@ -46,11 +46,11 @@ stonedb_set_root_passwd() {
   stonedb_note "set passwd"
 
   echo passwd
-  grep "temporary password" /opt/stonedb57/install/log/mysqld.log
+  grep "temporary password" /opt/stonedb57/install/data/mysqld.log
 
   grep "temporary password" /opt/stonedb57/install/log/tianmu.log
 
-  sdb_passwd=$(grep "temporary password" /opt/stonedb57/install/log/mysqld.log | awk -F " " '{print $11}')
+  sdb_passwd=$(grep "temporary password" /opt/stonedb57/install/data/mysqld.log | awk -F " " '{print $11}')
 
   mysql -h127.0.0.1 -uroot -p"$sdb_passwd" --connect-expired-password -e "alter user 'root'@'localhost'  identified by '$MYSQL_ROOT_PASSWORD';"
 
