@@ -38,7 +38,7 @@ docker run -itd \
 -e MYSQL_ROOT_PASSWORD={{Password}} \
 -v {{DataPath}}/{{ClusterName}}/config/my.cnf:/opt/stonedb57/install/my.cnf:rw \
 -v {{DataPath}}/{{ClusterName}}/data:/opt/stonedb57/install/data:rw \
-stoneatom/stonedb:5.7v1.0.2_centos
+stoneatom/stonedb:5.7v1.0.3_centos
 ```
 
 #### master-slave
